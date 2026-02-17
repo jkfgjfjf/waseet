@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة التسويق الذكية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+        }
+        
+        input[type="number"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        
+        textarea {
+            min-height: 120px;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .radio-option {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+        
+        .radio-option label {
+            display: block;
+            padding: 20px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            margin: 0;
+        }
+        
+        .radio-option input[type="radio"]:checked + label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .waiting-page {
+            display: none;
+            text-align: center;
+        }
+        
+        .timer {
+            font-size: 4em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 30px 0;
+            font-family: monospace;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .admin-page {
+            display: none;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .order-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-right: 4px solid #667eea;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .status-new { background: #e3f2fd; color: #1976d2; }
+        .status-contacted { background: #fff3e0; color: #f57c00; }
+        .status-done { background: #e8f5e9; color: #388e3c; }
+        
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
+        .btn-contact { background: #2196f3; color: white; }
+        .btn-done { background: #4caf50; color: white; }
+        .btn-delete { background: #f44336; color: white; }
+        
+        .phones-section {
+            background: #f0f4ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .phone-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .phone-input { flex: 1; }
+        
+        .btn-add {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .phones-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .phone-tag {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .nav-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        
+        .success-message {
+            display: none;
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 منصة التسويق الذكية</h1>
+            <p>نربطك بأفضل فرص التسويق المناسبة لميزانيتك</p>
+        </div>
+        
+        <div id="customerPage" class="card">
+            <div id="successMessage" class="success-message">
+                ✅ تم إرسال طلبك بنجاح! انتظر مكالمتنا خلال 10 دقائق
+            </div>
+            
+            <form id="marketingForm">
+                <div class="form-group">
+                    <label>💰 ميزانيتك (بالريال) <span class="required">*</span></label>
+                    <input type="number" id="budget" min="1" placeholder="مثال: 5000" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📊 نشاط المشروع <span class="required">*</span></label>
+                    <select id="category" required>
+                        <option value="">-- اختر --</option>
+                        <option value="تجارة إلكترونية">🛒 تجارة إلكترونية</option>
+                        <option value="مطاعم وكافيهات">🍽️ مطاعم وكافيهات</option>
+                        <option value="عقارات">🏠 عقارات</option>
+                        <option value="سياحة وسفر">✈️ سياحة وسفر</option>
+                        <option value="تعليم وتدريب">📚 تعليم وتدريب</option>
+                        <option value="صحة ولياقة">💪 صحة ولياقة</option>
+                        <option value="جمال وأزياء">💄 جمال وأزياء</option>
+                        <option value="تقنية وبرمجة">💻 تقنية وبرمجة</option>
+                        <option value="سيارات">🚗 سيارات</option>
+                        <option value="أخرى">📝 أخرى</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>💡 اشرح فكرتك <span class="required">*</span></label>
+                    <textarea id="idea" placeholder="اكتب تفاصيل المنتج أو الخدمة..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>📱 رقم الجوال <span class="required">*</span></label>
+                    <input type="tel" id="phone" placeholder="05xxxxxxxx" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📞 طريقة التواصل <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="contactText" name="contactMethod" value="text" checked>
+                            <label for="contactText">💬 نصي</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="contactCall" name="contactMethod" value="call">
+                            <label for="contactCall">📞 اتصال</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">إرسال الطلب 🚀</button>
+            </form>
+        </div>
+        
+        <div id="waitingPage" class="card waiting-page">
+            <div class="spinner"></div>
+            <h2 style="color: #667eea;">تم استلام طلبك!</h2>
+            <p style="color: #666;">سيصلك اتصال خلال:</p>
+            <div class="timer" id="countdown">10:00</div>
+            <button onclick="goHome()" class="btn" style="background: #666;">العودة</button>
+        </div>
+        
+        <div id="adminPage" class="admin-page">
+            <div class="card">
+                <div class="admin-header">
+                    <h2>⚙️ لوحة التحكم</h2>
+                    <button onclick="goHome()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px;">عودة</button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalOrders">0</div>
+                        <div>الكل</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="newOrders">0</div>
+                        <div>جديد</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="contactedOrders">0</div>
+                        <div>تم التواصل</div>
+                    </div>
+                </div>
+                
+                <div class="phones-section">
+                    <h3 class="section-title">📱 أرقام التواصل</h3>
+                    <div class="phone-input-group">
+                        <input type="tel" id="newPhone" class="phone-input" placeholder="05xxxxxxxx">
+                        <button onclick="addPhone()" class="btn-add">إضافة</button>
+                    </div>
+                    <div id="phonesList" class="phones-list"></div>
+                </div>
+                
+                <div class="orders-section">
+                    <h3 class="section-title">📋 الطلبات</h3>
+                    <div id="ordersList"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loginModal" class="modal-overlay">
+            <div class="modal">
+                <h3>🔐 دخول الأدمن</h3>
+                <input type="password" id="adminPassword" placeholder="كلمة المرور" style="width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: 2px solid #e0e0e0;">
+                <button onclick="login()" class="btn">دخول</button>
+                <button onclick="closeModal()" class="btn" style="background: #666; margin-top: 10px;">إلغاء</button>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" onclick="showCustomerPage()">الرئيسية</a>
+            <a href="#" onclick="showLogin()">التحكم</a>
+        </div>
+    </div>
+    
+    <script>
+        let orders = JSON.parse(localStorage.getItem('marketing_orders')) || [];
+        let phones = JSON.parse(localStorage.getItem('marketing_phones')) || ['0500000000', '0511111111'];
+        const ADMIN_PASSWORD = 'Sunset14042008';
+        
+        const customerPage = document.getElementById('customerPage');
+        const waitingPage = document.getElementById('waitingPage');
+        const adminPage = document.getElementById('adminPage');
+        const loginModal = document.getElementById('loginModal');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePhonesList();
+            updateOrdersList();
+        });
+        
+        document.getElementById('marketingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                id: Date.now(),
+                budget: document.getElementById('budget').value,
+                category: document.getElementById('category').value,
+                idea: document.getElementById('idea').value,
+                phone: document.getElementById('phone').value,
+                contactMethod: document.querySelector('input[name="contactMethod"]:checked').value,
+                status: 'new',
+                date: new Date().toLocaleString('ar-SA')
+            };
+            orders.unshift(formData);
+            localStorage.setItem('marketing_orders', JSON.stringify(orders));
+            document.getElementById('successMessage').style.display = 'block';
+            setTimeout(() => showWaitingPage(), 1000);
+        });
+        
+        function showWaitingPage() {
+            customerPage.style.display = 'none';
+            waitingPage.style.display = 'block';
+            let timeLeft = 600;
+            const countdownEl = document.getElementById('countdown');
+            const timer = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) clearInterval(timer);
+                timeLeft--;
+            }, 1000);
+        }
+        
+        function showCustomerPage() {
+            customerPage.style.display = 'block';
+            waitingPage.style.display = 'none';
+            adminPage.style.display = 'none';
+            document.getElementById('marketingForm').reset();
+        }
+        
+        function showLogin() { loginModal.style.display = 'flex'; }
+        function closeModal() { loginModal.style.display = 'none'; }
+        
+        function login() {
+            if (document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
+                closeModal();
+                showAdminPage();
+            } else {
+                alert('❌ خطأ!');
+            }
+        }
+        
+        function showAdminPage() {
+            customerPage.style.display = 'none';
+            adminPage.style.display = 'block';
+            updateStats();
+            updateOrdersList();
+        }
+        
+        function updateStats() {
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('newOrders').textContent = orders.filter(o => o.status === 'new').length;
+            document.getElementById('contactedOrders').textContent = orders.filter(o => o.status === 'contacted').length;
+        }
+        
+        function updateOrdersList() {
+            const list = document.getElementById('ordersList');
+            if (orders.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #999;">لا توجد طلبات</p>';
+                return;
+            }
+            list.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <span style="font-weight: bold; color: #667eea;">#${order.id.toString().slice(-6)}</span>
+                        <span class="order-status status-${order.status}">${order.status === 'new' ? 'جديد' : order.status === 'contacted' ? 'تم التواصل' : 'منتهي'}</span>
+                    </div>
+                    <p><strong>الميزانية:</strong> ${order.budget} ريال</p>
+                    <p><strong>النشاط:</strong> ${order.category}</p>
+                    <p><strong>العميل:</strong> ${order.phone}</p>
+                    <p><strong>الفكرة:</strong> ${order.idea}</p>
+                    <div class="order-actions">
+                        <button onclick="markContacted(${order.id})" class="action-btn btn-contact">تم التواصل</button>
+                        <button onclick="markDone(${order.id})" class="action-btn btn-done">إنهاء</button>
+                        <button onclick="deleteOrder(${order.id})" class="action-btn btn-delete">حذف</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function markContacted(id) {
+            const order = orders.find(o => o.id === id);
+            if (order) { order.status = 'contacted'; saveOrders(); }
+        }
+        
+        function markDone(id) {
+            const order = orders.find(o => o.id === id);
+            if (order) { order.status = 'done'; saveOrders(); }
+        }
+        
+        function deleteOrder(id) {
+            if (confirm('متأكد؟')) {
+                orders = orders.filter(o => o.id !== id);
+                saveOrders();
+            }
+        }
+        
+        function saveOrders() {
+            localStorage.setItem('marketing_orders', JSON.stringify(orders));
+            updateOrdersList();
+            updateStats();
+        }
+        
+        function updatePhonesList() {
+            document.getElementById('phonesList').innerHTML = phones.map((phone, i) => `
+                <div class="phone-tag">
+                    <span>${phone}</span>
+                    <button onclick="removePhone(${i})" style="background: none; border: none; color: #f44336;">×</button>
+                </div>
+            `).join('');
+        }
+        
+        function addPhone() {
+            const input = document.getElementById('newPhone');
+            const phone = input.value.trim();
+            if (phone && phone.match(/^05[0-9]{8}$/)) {
+                phones.push(phone);
+                localStorage.setItem('marketing_phones', JSON.stringify(phones));
+                input.value = '';
+                updatePhonesList();
+            } else {
+                alert('رقم غير صحيح!');
+            }
+        }
+        
+        function removePhone(index) {
+            phones.splice(index, 1);
+            localStorage.setItem('marketing_phones', JSON.stringify(phones));
+            updatePhonesList();
+        }
+        
+        function goHome() { showCustomerPage(); }
+    </script>
+</body>
+</html>
