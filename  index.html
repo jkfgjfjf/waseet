@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وسيط - منصة التسويق الآمنة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+        
+        * {
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-item {
+            transition: all 0.3s;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-right: 3px solid #fff;
+        }
+        
+        .active-nav {
+            background: rgba(255,255,255,0.15);
+            border-right: 3px solid #fff;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .money-card {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .pending-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .escrow-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .admin-secret-area {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            opacity: 0;
+            z-index: 100;
+        }
+
+        .admin-secret-area:hover {
+            opacity: 0.3;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+
+        .secret-modal {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .empty-state {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-disputed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .modal {
+            background: rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 gradient-bg flex items-center justify-center z-50">
+        <div class="admin-secret-area" onclick="showSecretInput()" title="Admin Access"></div>
+        
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-handshake text-3xl text-white"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800">وسيط</h1>
+                <p class="text-gray-600 mt-2">منصة التسويق الآمنة بالدفع الوسيط</p>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="login('client')" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fas fa-user"></i>
+                    دخول كعميل
+                </button>
+                <button onclick="login('company')" class="w-full bg-white border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-bold hover:bg-blue-50 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-building"></i>
+                    دخول كشركة تسويق
+                </button>
+            </div>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-400 text-sm">للشركات والأفراد</p>
+                <p class="text-gray-300 text-xs mt-2">اضغط على الزاوية اليسرى السفلية للوصول للإدارة</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secret Admin Code Modal -->
+    <div id="secretModal" class="hidden fixed inset-0 secret-modal flex items-center justify-center z-[60]">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-shield text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">الوصول للإدارة</h3>
+                <p class="text-gray-500 text-sm mt-2">أدخل كلمة المرور</p>
+            </div>
+            
+            <div class="space-y-4">
+                <input type="password" id="adminCode" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-center text-2xl tracking-widest focus:outline-none focus:border-purple-600" placeholder="••••••••••••" onkeypress="checkEnter(event)">
+                
+                <div id="errorMsg" class="hidden text-red-500 text-sm text-center bg-red-50 p-2 rounded-lg">
+                    <i class="fas fa-exclamation-circle"></i> كلمة المرور غير صحيحة
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="verifyAdminCode()" class="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-gray-900 transition">
+                        دخول
+                    </button>
+                    <button onclick="closeSecretModal()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="hidden flex h-screen">
+            <!-- Sidebar -->
+            <aside class="w-64 gradient-bg text-white flex flex-col">
+                <div class="p-6 border-b border-white/20">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fas fa-handshake"></i>
+                        وسيط
+                    </h2>
+                    <p class="text-sm opacity-75 mt-1">لوحة التحكم - Admin</p>
+                </div>
+                
+                <nav class="flex-1 py-4">
+                    <a href="#" onclick="showAdminSection('overview')" id="nav-overview" class="sidebar-item active-nav flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-chart-line"></i>
+                        <span>نظرة عامة</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('projects')" id="nav-projects" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>المشاريع</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('payments')" id="nav-payments" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>المدفوعات الوسيطة</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('users')" id="nav-users" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-users"></i>
+                        <span>المستخدمين</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('logs')" id="nav-logs" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-history"></i>
+                        <span>سجل العمليات</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('commissions')" id="nav-commissions" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-percentage"></i>
+                        <span>العمولات</span>
+                    </a>
+                </nav>
+                
+                <div class="p-4 border-t border-white/20">
+                    <button onclick="logout()" class="flex items-center gap-2 text-white/80 hover:text-white">
+                        <i class="fas fa-sign-out-alt"></i>
+                        تسجيل خروج
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-auto bg-gray-50 p-8">
+                <!-- Overview Section -->
+                <div id="admin-overview" class="fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">نظرة عامة على المنصة</h1>
+                        <span class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm">
+                            <i class="fas fa-user-shield"></i> Admin
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="money-card rounded-2xl p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-white/80 text-sm">إجمالي الأموال المحتجزة</p>
+                                    <h3 id="totalEscrow" class="text-3xl font-bold mt-2">٠ ر.س</h3>
+                                </div>
+                                <i class="fas fa-lock text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="pending-card rounded-2xl p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-white/80 text-sm">المشاريع النشطة</p>
+                                    <h3 id="activeProjects" class="text-3xl font-bold mt-2">٠</h3>
+                                </div>
+                                <i class="fas fa-clock text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="escrow-card rounded-2xl p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-white/80 text-sm">الصفقات المكتملة</p>
+                                    <h3 id="completedDeals" class="text-3xl font-bold mt-2">٠</h3>
+                                </div>
+                                <i class="fas fa-check-circle text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-white/80 text-sm">إجمالي العمولات</p>
+                                    <h3 id="totalCommissions" class="text-3xl font-bold mt-2">٠ ر.س</h3>
+                                </div>
+                                <i class="fas fa-coins text-4xl opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">آخر النشاطات</h3>
+                        <div id="recentActivity" class="space-y-3">
+                            <p class="text-gray-500 text-center py-4">لا توجد نشاطات حديثة</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects Section -->
+                <div id="admin-projects" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">إدارة المشاريع</h1>
+                    <div id="projectsList" class="space-y-4">
+                        <div class="empty-state rounded-2xl p-12 text-center">
+                            <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع حالياً</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Section -->
+                <div id="admin-payments" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">المدفوعات الوسيطة</h1>
+                    <div id="escrowList" class="space-y-4">
+                        <div class="empty-state rounded-2xl p-12 text-center">
+                            <i class="fas fa-lock text-6xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد أموال محتجزة</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <div id="admin-users" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">إدارة المستخدمين</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-users text-blue-600"></i>
+                                العملاء
+                                <span id="clientsCount" class="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">٠</span>
+                            </h3>
+                            <div id="clientsList" class="space-y-2 max-h-96 overflow-y-auto">
+                                <p class="text-gray-500 text-center py-4">لا يوجد عملاء مسجلين</p>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-building text-purple-600"></i>
+                                شركات التسويق
+                                <span id="companiesCount" class="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded-full">٠</span>
+                            </h3>
+                            <div id="companiesList" class="space-y-2 max-h-96 overflow-y-auto">
+                                <p class="text-gray-500 text-center py-4">لا توجد شركات مسجلة</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Section -->
+                <div id="admin-logs" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">سجل العمليات</h1>
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <p class="text-gray-600">جميع العمليات المسجلة في النظام</p>
+                            <button onclick="clearLogs()" class="text-red-600 hover:text-red-800 text-sm">
+                                <i class="fas fa-trash"></i> مسح السجل
+                            </button>
+                        </div>
+                        <div id="logsList" class="space-y-2 max-h-96 overflow-y-auto">
+                            <p class="text-gray-500 text-center py-8">لا توجد عمليات مسجلة</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commissions Section -->
+                <div id="admin-commissions" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">إعدادات العمولات</h1>
+                    <div class="bg-white rounded-2xl shadow-lg p-6 max-w-2xl">
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-bold mb-2">نسبة العمولة (%)</label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="commissionSlider" min="5" max="30" value="10" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" oninput="updateCommission(this.value)">
+                                <span id="commissionValue" class="text-2xl font-bold text-purple-600 w-20">١٠%</span>
+                            </div>
+                            <p class="text-gray-500 text-sm mt-2">يتم خصم هذه النسبة من قيمة كل مشروع</p>
+                        </div>
+                        <button onclick="saveCommission()" class="mt-6 bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 w-full">
+                            حفظ الإعدادات
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Client Dashboard -->
+        <div id="clientDashboard" class="hidden">
+            <nav class="gradient-bg text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-handshake text-2xl"></i>
+                        <span class="text-xl font-bold">وسيط</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="showClientSection('newProject')" class="bg-white text-purple-600 px-4 py-2 rounded-lg font-bold hover:bg-gray-100">
+                            <i class="fas fa-plus"></i> مشروع جديد
+                        </button>
+                        <button onclick="showClientSection('projects')" class="text-white/80 hover:text-white">
+                            <i class="fas fa-list"></i> مشاريعي
+                        </button>
+                        <button onclick="logout()" class="text-white/80 hover:text-white">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container mx-auto p-6">
+                <!-- New Project Section -->
+                <div id="client-newProject" class="fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">مشروع تسويقي جديد</h1>
+                    <div class="bg-white rounded-2xl shadow-lg p-8 max-w-3xl">
+                        <form onsubmit="submitProject(event)" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-700 font-bold mb-2">عنوان المشروع *</label>
+                                <input type="text" id="projectTitle" required class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600" placeholder="مثال: حملة تسويقية لإطلاق منتج جديد">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-bold mb-2">تفاصيل الفكرة التسويقية *</label>
+                                <textarea id="projectDetails" rows="4" required class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600" placeholder="اشرح فكرتك بالتفصيل..."></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-bold mb-2">الميزانية (ر.س) *</label>
+                                    <input type="number" id="projectBudget" required min="1000" class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600" placeholder="٥٠,٠٠٠" oninput="calculateFees()">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-bold mb-2">المدة المتوقعة *</label>
+                                    <select id="projectDuration" required class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                                        <option value="">اختر المدة</option>
+                                        <option value="أسبوع">أسبوع</option>
+                                        <option value="شهر">شهر</option>
+                                        <option value="٣ أشهر">٣ أشهر</option>
+                                        <option value="٦ أشهر">٦ أشهر</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                                <h4 class="font-bold text-purple-800 mb-2"><i class="fas fa-calculator"></i> تفاصيل الدفع:</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>مبلغ المشروع:</span>
+                                        <span id="displayBudget" class="font-bold">٠ ر.س</span>
+                                    </div>
+                                    <div class="flex justify-between text-purple-600">
+                                        <span>رسوم الوساطة (<span id="feePercent">١٠</span>%):</span>
+                                        <span id="displayFee" class="font-bold">٠ ر.س</span>
+                                    </div>
+                                    <div class="border-t border-purple-200 pt-2 flex justify-between font-bold text-lg">
+                                        <span>المبلغ المستحق دفعه:</span>
+                                        <span id="displayTotal">٠ ر.س</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition">
+                                <i class="fas fa-lock"></i> إنشاء المشروع والدفع الآمن
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- My Projects Section -->
+                <div id="client-projects" class="hidden fade-in mt-8">
+                    <h2 class="text-2xl font-bold mb-4">مشاريعي</h2>
+                    <div id="clientProjectsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Projects will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Dashboard -->
+        <div id="companyDashboard" class="hidden">
+            <nav class="gradient-bg text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-handshake text-2xl"></i>
+                        <span class="text-xl font-bold">وسيط - شركة الإبداع</span>
+                    </div>
+                    <button onclick="logout()" class="text-white/80 hover:text-white">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="container mx-auto p-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">المشاريع المتاحة</h1>
+                <div id="availableProjects" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Available projects will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Details Modal -->
+    <div id="projectModal" class="hidden fixed inset-0 modal flex items-center justify-center z-[70] p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 id="modalTitle" class="text-2xl font-bold"></h2>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="p-6">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const ADMIN_CODE = 'Sunset14042008';
+        let currentUser = null;
+        let currentUserData = null;
+        
+        // ==================== DATA STORAGE ====================
+        // All data stored in localStorage - no external database needed!
+        
+        function getData(key) {
+            const data = localStorage.getItem(`waseet_${key}`);
+            return data ? JSON.parse(data) : null;
+        }
+        
+        function setData(key, value) {
+            localStorage.setItem(`waseet_${key}`, JSON.stringify(value));
+        }
+        
+        function initData() {
+            if (!getData('projects')) setData('projects', []);
+            if (!getData('users')) setData('users', { clients: [], companies: [] });
+            if (!getData('logs')) setData('logs', []);
+            if (!getData('commission')) setData('commission', 10);
+            if (!getData('escrow')) setData('escrow', []);
+        }
+        
+        // ==================== LOGGING SYSTEM ====================
+        function addLog(action, details = {}) {
+            const logs = getData('logs') || [];
+            logs.unshift({
+                id: Date.now(),
+                action,
+                details,
+                timestamp: new Date().toISOString(),
+                user: currentUser
+            });
+            setData('logs', logs.slice(0, 100)); // Keep last 100 logs
+            updateAdminStats();
+        }
+        
+        // ==================== NOTIFICATIONS ====================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        // ==================== AUTHENTICATION ====================
+        function showSecretInput() {
+            document.getElementById('secretModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('adminCode').focus(), 100);
+        }
+        
+        function closeSecretModal() {
+            document.getElementById('secretModal').classList.add('hidden');
+            document.getElementById('adminCode').value = '';
+            document.getElementById('errorMsg').classList.add('hidden');
+        }
+        
+        function checkEnter(event) {
+            if (event.key === 'Enter') verifyAdminCode();
+        }
+        
+        function verifyAdminCode() {
+            const input = document.getElementById('adminCode').value;
+            if (input === ADMIN_CODE) {
+                closeSecretModal();
+                login('admin');
+            } else {
+                document.getElementById('errorMsg').classList.remove('hidden');
+                document.getElementById('adminCode').value = '';
+            }
+        }
+        
+        function login(type) {
+            currentUser = type;
+            
+            // Create user data
+            if (type === 'client') {
+                currentUserData = {
+                    id: 'client_' + Date.now(),
+                    name: 'عميل ' + Math.floor(Math.random() * 1000),
+                    type: 'client',
+                    joinDate: new Date().toISOString()
+                };
+                saveUser(currentUserData);
+            } else if (type === 'company') {
+                currentUserData = {
+                    id: 'company_' + Date.now(),
+                    name: 'شركة الإبداع للتسويق',
+                    type: 'company',
+                    joinDate: new Date().toISOString()
+                };
+                saveUser(currentUserData);
+            }
+            
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            if (type === 'admin') {
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                updateAdminStats();
+                showToast('تم الدخول كمدير بنجاح');
+                addLog('admin_login', { timestamp: new Date() });
+            } else if (type === 'client') {
+                document.getElementById('clientDashboard').classList.remove('hidden');
+                showClientSection('newProject');
+                showToast('مرحباً بك في لوحة العميل');
+                addLog('client_login', { userId: currentUserData.id });
+            } else if (type === 'company') {
+                document.getElementById('companyDashboard').classList.remove('hidden');
+                loadAvailableProjects();
+                showToast('مرحباً بك في لوحة الشركة');
+                addLog('company_login', { userId: currentUserData.id });
+            }
+        }
+        
+        function logout() {
+            currentUser = null;
+            currentUserData = null;
+            location.reload();
+        }
+        
+        function saveUser(userData) {
+            const users = getData('users');
+            const existingIndex = users[userData.type + 's'].findIndex(u => u.id === userData.id);
+            if (existingIndex === -1) {
+                users[userData.type + 's'].push(userData);
+                setData('users', users);
+            }
+        }
+        
+        // ==================== NAVIGATION ====================
+        function showAdminSection(section) {
+            ['overview', 'projects', 'payments', 'users', 'logs', 'commissions'].forEach(s => {
+                document.getElementById(`admin-${s}`)?.classList.add('hidden');
+                document.getElementById(`nav-${s}`)?.classList.remove('active-nav');
+            });
+            document.getElementById(`admin-${section}`).classList.remove('hidden');
+            document.getElementById(`nav-${section}`)?.classList.add('active-nav');
+            
+            if (section === 'projects') loadAdminProjects();
+            if (section === 'payments') loadEscrowPayments();
+            if (section === 'users') loadUsers();
+            if (section === 'logs') loadLogs();
+        }
+        
+        function showClientSection(section) {
+            document.getElementById('client-newProject').classList.add('hidden');
+            document.getElementById('client-projects').classList.add('hidden');
+            document.getElementById(`client-${section}`).classList.remove('hidden');
+            
+            if (section === 'projects') loadClientProjects();
+        }
+        
+        // ==================== CLIENT FUNCTIONS ====================
+        function calculateFees() {
+            const budget = parseInt(document.getElementById('projectBudget').value) || 0;
+            const commission = getData('commission') || 10;
+            const fee = Math.round(budget * (commission / 100));
+            const total = budget + fee;
+            
+            document.getElementById('displayBudget').textContent = formatMoney(budget);
+            document.getElementById('displayFee').textContent = formatMoney(fee);
+            document.getElementById('displayTotal').textContent = formatMoney(total);
+            document.getElementById('feePercent').textContent = commission;
+        }
+        
+        function submitProject(e) {
+            e.preventDefault();
+            
+            const budget = parseInt(document.getElementById('projectBudget').value);
+            const commission = getData('commission') || 10;
+            const fee = Math.round(budget * (commission / 100));
+            
+            const project = {
+                id: 'PRJ-' + Date.now(),
+                title: document.getElementById('projectTitle').value,
+                details: document.getElementById('projectDetails').value,
+                budget: budget,
+                fee: fee,
+                total: budget + fee,
+                duration: document.getElementById('projectDuration').value,
+                clientId: currentUserData.id,
+                clientName: currentUserData.name,
+                companyId: null,
+                companyName: null,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                startedAt: null,
+                completedAt: null
+            };
+            
+            const projects = getData('projects');
+            projects.push(project);
+            setData('projects', projects);
+            
+            // Add to escrow
+            const escrow = getData('escrow');
+            escrow.push({
+                id: 'ESC-' + Date.now(),
+                projectId: project.id,
+                amount: project.total,
+                status: 'held',
+                createdAt: new Date().toISOString()
+            });
+            setData('escrow', escrow);
+            
+            addLog('project_created', { projectId: project.id, amount: project.total });
+            showToast('تم إنشاء المشروع وتحويل المبلغ للحساب الوسيط بنجاح!');
+            
+            // Reset form
+            document.getElementById('projectTitle').value = '';
+            document.getElementById('projectDetails').value = '';
+            document.getElementById('projectBudget').value = '';
+            document.getElementById('projectDuration').value = '';
+            calculateFees();
+            
+            showClientSection('projects');
+        }
+        
+        function loadClientProjects() {
+            const projects = getData('projects').filter(p => p.clientId === currentUserData.id);
+            const container = document.getElementById('clientProjectsList');
+            
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-2 empty-state rounded-2xl p-12 text-center">
+                        <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع</h3>
+                        <button onclick="showClientSection('newProject')" class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 mt-4">
+                            <i class="fas fa-plus"></i> مشروع جديد
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = projects.map(project => `
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-r-4 ${getStatusColor(project.status)}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">${project.title}</h3>
+                            <p class="text-gray-500 text-sm">${formatDate(project.createdAt)}</p>
+                        </div>
+                        <span class="status-badge status-${project.status}">${getStatusText(project.status)}</span>
+                    </div>
+                    <p class="text-gray-600 mb-4 line-clamp-2">${project.details}</p>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="font-bold text-purple-600">${formatMoney(project.budget)}</span>
+                        <span class="text-gray-500"><i class="fas fa-clock"></i> ${project.duration}</span>
+                    </div>
+                    ${project.companyName ? `
+                        <div class="mt-4 pt-4 border-t">
+                            <p class="text-sm text-gray-600">تم التعاقد مع: <span class="font-bold">${project.companyName}</span></p>
+                        </div>
+                    ` : ''}
+                    ${project.status === 'active' ? `
+                        <button onclick="completeProject('${project.id}')" class="w-full mt-4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+                            <i class="fas fa-check"></i> تأكيد استلام العمل
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function completeProject(projectId) {
+            if (!confirm('هل أنت متأكد من استلام العمل وموافقتك على تحويل المبلغ للشركة؟')) return;
+            
+            const projects = getData('projects');
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                project.status = 'completed';
+                project.completedAt = new Date().toISOString();
+                setData('projects', projects);
+                
+                // Release escrow
+                const escrow = getData('escrow');
+                const escrowItem = escrow.find(e => e.projectId === projectId);
+                if (escrowItem) {
+                    escrowItem.status = 'released';
+                    escrowItem.releasedAt = new Date().toISOString();
+                    setData('escrow', escrow);
+                }
+                
+                addLog('project_completed', { projectId, amount: project.budget });
+                showToast('تم إتمام المشروع وتحويل المبلغ للشركة بنجاح!');
+                loadClientProjects();
+                updateAdminStats();
+            }
+        }
+        
+        // ==================== COMPANY FUNCTIONS ====================
+        function loadAvailableProjects() {
+            const projects = getData('projects').filter(p => p.status === 'pending' && !p.companyId);
+            const container = document.getElementById('availableProjects');
+            
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 empty-state rounded-2xl p-12 text-center">
+                        <i class="fas fa-search text-6xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع متاحة حالياً</h3>
+                        <p class="text-gray-500">تحقق لاحقاً للمزيد من الفرص</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = projects.map(project => `
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-bold text-lg">${project.title}</h3>
+                        <span class="status-badge status-pending">متاح</span>
+                    </div>
+                    <p class="text-gray-600 mb-4 line-clamp-3">${project.details}</p>
+                    <div class="space-y-2 text-sm mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">الميزانية:</span>
+                            <span class="font-bold text-purple-600">${formatMoney(project.budget)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">المدة:</span>
+                            <span>${project.duration}</span>
+                        </div>
+                    </div>
+                    <button onclick="acceptProject('${project.id}')" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-bold hover:shadow-lg">
+                        <i class="fas fa-handshake"></i> قبول المشروع
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        function acceptProject(projectId) {
+            if (!confirm('هل أنت متأكد من قبول هذا المشروع؟')) return;
+            
+            const projects = getData('projects');
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                project.status = 'active';
+                project.companyId = currentUserData.id;
+                project.companyName = currentUserData.name;
+                project.startedAt = new Date().toISOString();
+                setData('projects', projects);
+                
+                addLog('project_accepted', { projectId, companyId: currentUserData.id });
+                showToast('تم قبول المشروع بنجاح! يمكنك البدء بالعمل الآن.');
+                loadAvailableProjects();
+                updateAdminStats();
+            }
+        }
+        
+        // ==================== ADMIN FUNCTIONS ====================
+        function updateAdminStats() {
+            const projects = getData('projects');
+            const escrow = getData('escrow');
+            const commission = getData('commission') || 10;
+            
+            const totalEscrow = escrow.filter(e => e.status === 'held').reduce((sum, e) => sum + e.amount, 0);
+            const activeProjects = projects.filter(p => p.status === 'active').length;
+            const completedDeals = projects.filter(p => p.status === 'completed').length;
+            const totalCommissions = projects.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.fee, 0);
+            
+            document.getElementById('totalEscrow').textContent = formatMoney(totalEscrow);
+            document.getElementById('activeProjects').textContent = activeProjects;
+            document.getElementById('completedDeals').textContent = completedDeals;
+            document.getElementById('totalCommissions').textContent = formatMoney(totalCommissions);
+            
+            // Update recent activity
+            const logs = getData('logs').slice(0, 5);
+            const activityContainer = document.getElementById('recentActivity');
+            if (logs.length > 0) {
+                activityContainer.innerHTML = logs.map(log => `
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-history text-purple-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-sm">${getActionText(log.action)}</p>
+                            <p class="text-xs text-gray-500">${formatDate(log.timestamp)}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function loadAdminProjects() {
+            const projects = getData('projects');
+            const container = document.getElementById('projectsList');
+            
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state rounded-2xl p-12 text-center">
+                        <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع حالياً</h3>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = projects.map(project => `
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">${project.title}</h3>
+                            <p class="text-sm text-gray-500">بواسطة: ${project.clientName}</p>
+                        </div>
+                        <span class="status-badge status-${project.status}">${getStatusText(project.status)}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-sm mb-4">
+                        <div>
+                            <p class="text-gray-500">الميزانية</p>
+                            <p class="font-bold">${formatMoney(project.budget)}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">العمولة</p>
+                            <p class="font-bold text-purple-600">${formatMoney(project.fee)}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">الإجمالي</p>
+                            <p class="font-bold text-green-600">${formatMoney(project.total)}</p>
+                        </div>
+                    </div>
+                    ${project.companyName ? `
+                        <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                            <p class="text-sm"><i class="fas fa-building text-blue-600"></i> تنفذه: <span class="font-bold">${project.companyName}</span></p>
+                        </div>
+                    ` : ''}
+                    <div class="flex gap-2">
+                        <button onclick="viewProjectDetails('${project.id}')" class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200">
+                            <i class="fas fa-eye"></i> التفاصيل
+                        </button>
+                        ${project.status === 'pending' ? `
+                            <button onclick="cancelProject('${project.id}')" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function loadEscrowPayments() {
+            const escrow = getData('escrow');
+            const projects = getData('projects');
+            const container = document.getElementById('escrowList');
+            
+            if (escrow.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state rounded-2xl p-12 text-center">
+                        <i class="fas fa-lock text-6xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد أموال محتجزة</h3>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = escrow.map(item => {
+                const project = projects.find(p => p.id === item.projectId);
+                return `
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border-r-4 ${item.status === 'held' ? 'border-yellow-400' : 'border-green-400'}">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-bold text-lg">${project ? project.title : 'مشروع محذوف'}</h3>
+                                <p class="text-sm text-gray-500">رقم العملية: ${item.id}</p>
+                            </div>
+                            <span class="status-badge ${item.status === 'held' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                ${item.status === 'held' ? 'محتجز' : 'تم التحرير'}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-gray-500 text-sm">المبلغ المحتجز</p>
+                                <p class="text-2xl font-bold text-purple-600">${formatMoney(item.amount)}</p>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-gray-500 text-sm">تاريخ العملية</p>
+                                <p class="font-bold">${formatDate(item.createdAt)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function loadUsers() {
+            const users = getData('users');
+            
+            // Update counts
+            document.getElementById('clientsCount').textContent = users.clients.length;
+            document.getElementById('companiesCount').textContent = users.companies.length;
+            
+            // Load clients
+            const clientsContainer = document.getElementById('clientsList');
+            if (users.clients.length === 0) {
+                clientsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">لا يوجد عملاء مسجلين</p>';
+            } else {
+                clientsContainer.innerHTML = users.clients.map(user => `
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-sm">${user.name}</p>
+                            <p class="text-xs text-gray-500">${formatDate(user.joinDate)}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Load companies
+            const companiesContainer = document.getElementById('companiesList');
+            if (users.companies.length === 0) {
+                companiesContainer.innerHTML = '<p class="text-gray-500 text-center py-4">لا توجد شركات مسجلة</p>';
+            } else {
+                companiesContainer.innerHTML = users.companies.map(user => `
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-building text-purple-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-sm">${user.name}</p>
+                            <p class="text-xs text-gray-500">${formatDate(user.joinDate)}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function loadLogs() {
+            const logs = getData('logs');
+            const container = document.getElementById('logsList');
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">لا توجد عمليات مسجلة</p>';
+                return;
+            }
+            
+            container.innerHTML = logs.map(log => `
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border-r-2 border-purple-400">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-sm">${getActionText(log.action)}</p>
+                        <p class="text-xs text-gray-500">${formatDate(log.timestamp)} - بواسطة: ${log.user}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function clearLogs() {
+            if (!confirm('هل أنت متأكد من مسح جميع السجلات؟')) return;
+            setData('logs', []);
+            loadLogs();
+            showToast('تم مسح السجل بنجاح');
+        }
+        
+        function updateCommission(val) {
+            document.getElementById('commissionValue').textContent = val + '%';
+        }
+        
+        function saveCommission() {
+            const val = document.getElementById('commissionSlider').value;
+            setData('commission', parseInt(val));
+            addLog('commission_changed', { newRate: val });
+            showToast('تم حفظ إعدادات العمولة بنجاح');
+        }
+        
+        function cancelProject(projectId) {
+            if (!confirm('هل أنت متأكد من إلغاء هذا المشروع؟ سيتم إرجاع المبلغ للعميل.')) return;
+            
+            const projects = getData('projects');
+            const projectIndex = projects.findIndex(p => p.id === projectId);
+            if (projectIndex > -1) {
+                projects[projectIndex].status = 'cancelled';
+                setData('projects', projects);
+                
+                // Return escrow
+                const escrow = getData('escrow');
+                const escrowItem = escrow.find(e => e.projectId === projectId);
+                if (escrowItem) {
+                    escrowItem.status = 'returned';
+                    escrowItem.returnedAt = new Date().toISOString();
+                    setData('escrow', escrow);
+                }
+                
+                addLog('project_cancelled', { projectId });
+                showToast('تم إلغاء المشروع وإرجاع المبلغ للعميل');
+                loadAdminProjects();
+                updateAdminStats();
+            }
+        }
+        
+        function viewProjectDetails(projectId) {
+            const project = getData('projects').find(p => p.id === projectId);
+            if (!project) return;
+            
+            document.getElementById('modalTitle').textContent = project.title;
+            document.getElementById('modalContent').innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <h4 class="font-bold mb-2">تفاصيل المشروع</h4>
+                        <p class="text-gray-600">${project.details}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">العميل</p>
+                            <p class="font-bold">${project.clientName}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">الحالة</p>
+                            <span class="status-badge status-${project.status}">${getStatusText(project.status)}</span>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">الميزانية</p>
+                            <p class="font-bold text-purple-600">${formatMoney(project.budget)}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">المدة</p>
+                            <p class="font-bold">${project.duration}</p>
+                        </div>
+                    </div>
+                    ${project.companyName ? `
+                        <div class="bg-blue-50 p-4 rounded-xl">
+                            <p class="text-gray-500 text-sm">الشركة المنفذة</p>
+                            <p class="font-bold text-blue-600">${project.companyName}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('projectModal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('projectModal').classList.add('hidden');
+        }
+        
+        // ==================== HELPERS ====================
+        function formatMoney(amount) {
+            return amount.toLocaleString('ar-SA') + ' ر.س';
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ar-SA');
+        }
+        
+        function getStatusColor(status) {
+            const colors = {
+                pending: 'border-yellow-400',
+                active: 'border-blue-400',
+                completed: 'border-green-400',
+                cancelled: 'border-red-400'
+            };
+            return colors[status] || 'border-gray-400';
+        }
+        
+        function getStatusText(status) {
+            const texts = {
+                pending: 'بانتظار العروض',
+                active: 'قيد التنفيذ',
+                completed: 'مكتمل',
+                cancelled: 'ملغي'
+            };
+            return texts[status] || status;
+        }
+        
+        function getActionText(action) {
+            const texts = {
+                admin_login: 'تسجيل دخول المدير',
+                client_login: 'تسجيل دخول عميل',
+                company_login: 'تسجيل دخول شركة',
+                project_created: 'إنشاء مشروع جديد',
+                project_accepted: 'قبول مشروع',
+                project_completed: 'إتمام مشروع',
+                project_cancelled: 'إلغاء مشروع',
+                commission_changed: 'تغيير نسبة العمولة'
+            };
+            return texts[action] || action;
+        }
+        
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            initData();
+            
+            // Close modal on outside click
+            document.getElementById('projectModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            
+            document.getElementById('secretModal').addEventListener('click', function(e) {
+                if (e.target === this) closeSecretModal();
+            });
+        });
+    </script>
+</body>
+</html>
