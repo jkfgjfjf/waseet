@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وسيط - منصة التسويق الآمنة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+        
+        * {
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-item {
+            transition: all 0.3s;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-right: 3px solid #fff;
+        }
+        
+        .active-nav {
+            background: rgba(255,255,255,0.15);
+            border-right: 3px solid #fff;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .money-card {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .pending-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .escrow-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .admin-secret-area {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            opacity: 0;
+            z-index: 100;
+            border-radius: 10px;
+        }
+
+        .admin-secret-area:hover {
+            opacity: 0.3;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .secret-modal {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .notification-badge {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .empty-state {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .status-pulse {
+            animation: statusPulse 2s infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 gradient-bg flex items-center justify-center z-50">
+        <!-- Hidden admin access area (bottom left corner) - أكبر شوي وأسهل للضغط -->
+        <div class="admin-secret-area" onclick="showSecretInput()" title="Admin Access"></div>
+        
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-handshake text-3xl text-white"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800">وسيط</h1>
+                <p class="text-gray-600 mt-2">منصة التسويق الآمنة بالدفع الوسيط</p>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="login('client')" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fas fa-user"></i>
+                    دخول كعميل
+                </button>
+                <button onclick="login('company')" class="w-full bg-white border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-bold hover:bg-blue-50 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-building"></i>
+                    دخول كشركة تسويق
+                </button>
+            </div>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-400 text-sm">للشركات والأفراد</p>
+                <p class="text-gray-300 text-xs mt-2">اضغط على الزاوية اليسرى السفلية للوصول للإدارة</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secret Admin Code Modal -->
+    <div id="secretModal" class="hidden fixed inset-0 secret-modal flex items-center justify-center z-[60]">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-shield text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">الوصول للإدارة</h3>
+                <p class="text-gray-500 text-sm mt-2">أدخل كلمة المرور</p>
+            </div>
+            
+            <div class="space-y-4">
+                <input type="password" id="adminCode" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-center text-2xl tracking-widest focus:outline-none focus:border-purple-600" placeholder="••••••••••••" onkeypress="checkEnter(event)">
+                
+                <div id="errorMsg" class="hidden text-red-500 text-sm text-center bg-red-50 p-2 rounded-lg">
+                    <i class="fas fa-exclamation-circle"></i> كلمة المرور غير صحيحة
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="verifyAdminCode()" class="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-gray-900 transition">
+                        دخول
+                    </button>
+                    <button onclick="closeSecretModal()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition">
+                        إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="hidden flex h-screen">
+            <!-- Sidebar -->
+            <aside class="w-64 gradient-bg text-white flex flex-col">
+                <div class="p-6 border-b border-white/20">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fas fa-handshake"></i>
+                        وسيط
+                    </h2>
+                    <p class="text-sm opacity-75 mt-1">لوحة التحكم - Admin</p>
+                </div>
+                
+                <nav class="flex-1 py-4">
+                    <a href="#" onclick="showAdminSection('overview')" id="nav-overview" class="sidebar-item active-nav flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-chart-line"></i>
+                        <span>نظرة عامة</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('projects')" id="nav-projects" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>المشاريع</span>
+                        <span id="adminProjectCount" class="bg-white/20 px-2 py-1 rounded text-xs hidden">0</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('payments')" id="nav-payments" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>المدفوعات الوسيطة</span>
+                        <span id="escrowCount" class="bg-white/20 px-2 py-1 rounded text-xs hidden">0</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('users')" id="nav-users" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-users"></i>
+                        <span>المستخدمين</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('logs')" id="nav-logs" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-history"></i>
+                        <span>سجل العمليات</span>
+                    </a>
+                    <a href="#" onclick="showAdminSection('commissions')" id="nav-commissions" class="sidebar-item flex items-center gap-3 px-6 py-3">
+                        <i class="fas fa-percentage"></i>
+                        <span>العمولات</span>
+                    </a>
+                </nav>
+                
+                <div class="p-4 border-t border-white/20">
+                    <button onclick="logout()" class="flex items-center gap-2 text-white/80 hover:text-white">
+                        <i class="fas fa-sign-out-alt"></i>
+                        تسجيل خروج
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-auto bg-gray-50 p-8">
+                <!-- Overview Section -->
+                <div id="admin-overview" class="fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">نظرة عامة على المنصة</h1>
+                        <div class="flex items-center gap-4">
+                            <span id="liveTime" class="text-gray-500"></span>
+                            <span class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm">
+                                <i class="fas fa-user-shield"></i> Admin
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="money-card rounded-2xl p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-white/80 text-sm">إجمالي الأموال المحتجزة</p>
+                                    <h3 id="totalEscrow" class="text-3xl font-bold mt-2">٠ ر.س</h3>
+                                </div>
+                                <i class="fas fa-lock text-4xl opacity-50"></i>
+                            </div>
+                            <p class="text-sm mt-4 text-white/80">الأموال في الضمان</p>
+                        </div>
+                        
+                        <div class="pending-card rounded-2xl p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-white/80 text-sm">المشاريع النشطة</p>
+                                    <h3 id="activeProjects" class="text-3xl font-bold mt-2">٠</h3>
+                                </div>
+                                <i class="fas fa-clock text-4xl opacity-50"></i>
+                            </div>
+                            <p class="text-sm mt-4 text-white/80">قيد التنفيذ</p>
+                        </div>
+                        
+                        <div class="escrow-card rounded-2xl p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-white/80 text-sm">الصفقات المكتملة</p>
+                                    <h3 id="completedDeals" class="text-3xl font-bold mt-2">٠</h3>
+                                </div>
+                                <i class="fas fa-check-circle text-4xl opacity-50"></i>
+                            </div>
+                            <p class="text-sm mt-4 text-white/80">نسبة النجاح: <span id="successRate">٠%</span></p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-white/80 text-sm">إجمالي العمولات</p>
+                                    <h3 id="totalCommissions" class="text-3xl font-bold mt-2">٠ ر.س</h3>
+                                </div>
+                                <i class="fas fa-coins text-4xl opacity-50"></i>
+                            </div>
+                            <p class="text-sm mt-4 text-white/80">أرباح المنصة</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold mb-4">حركة الأموال</h3>
+                            <canvas id="escrowChart" height="200"></canvas>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold mb-4">آخر العمليات</h3>
+                            <div id="recentActivity" class="space-y-3 max-h-64 overflow-y-auto">
+                                <div class="text-center text-gray-500 py-8">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>لا توجد عمليات بعد</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects Section -->
+                <div id="admin-projects" class="hidden fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">إدارة المشاريع</h1>
+                        <div class="flex gap-2">
+                            <select id="projectFilter" onchange="filterProjects()" class="border rounded-lg px-4 py-2">
+                                <option value="all">الكل</option>
+                                <option value="pending">بانتظار الدفع</option>
+                                <option value="active">قيد التنفيذ</option>
+                                <option value="completed">مكتمل</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="projectsList" class="space-y-4">
+                        <!-- Empty State -->
+                        <div class="empty-state rounded-2xl p-12 text-center">
+                            <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع حالياً</h3>
+                            <p class="text-gray-500">المشاريع ستظهر هنا عندما يقوم العملاء بإضافتها</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Section (Escrow) -->
+                <div id="admin-payments" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">المدفوعات الوسيطة (الضمان)</h1>
+                    
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold">كيف يعمل نظام الوسيط؟</h3>
+                            <i class="fas fa-shield-alt text-4xl text-purple-600"></i>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="text-center p-4 bg-gray-50 rounded-xl">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 text-blue-600 font-bold">1</div>
+                                <p class="font-bold">العميل يدفع</p>
+                                <p class="text-sm text-gray-600">يحول المبلغ لحساب المنصة</p>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-xl">
+                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2 text-purple-600 font-bold">2</div>
+                                <p class="font-bold">نحتفظ بالمبلغ</p>
+                                <p class="text-sm text-gray-600">نضمن حق الطرفين</p>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-xl">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2 text-green-600 font-bold">3</div>
+                                <p class="font-bold">نحول للشركة</p>
+                                <p class="text-sm text-gray-600">بعد خصم العمولة</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="escrowList" class="space-y-4">
+                        <!-- Empty State -->
+                        <div class="empty-state rounded-2xl p-12 text-center">
+                            <i class="fas fa-lock text-6xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد أموال محتجزة</h3>
+                            <p class="text-gray-500">الأموال المحتجزة ستظهر هنا عند دفع العملاء</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <div id="admin-users" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">إدارة المستخدمين</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold">العملاء</h3>
+                                <span id="clientsCount" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">٠ عميل</span>
+                            </div>
+                            <div id="clientsList" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <i class="fas fa-users text-4xl mb-2"></i>
+                                    <p>لا يوجد عملاء مسجلين</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold">شركات التسويق</h3>
+                                <span id="companiesCount" class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">٠ شركة</span>
+                            </div>
+                            <div id="companiesList" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <i class="fas fa-building text-4xl mb-2"></i>
+                                    <p>لا توجد شركات مسجلة</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Section -->
+                <div id="admin-logs" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">سجل العمليات</h1>
+                    
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div id="activityLog" class="space-y-4 max-h-96 overflow-y-auto">
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fas fa-history text-4xl mb-2"></i>
+                                <p>لا توجد عمليات مسجلة</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commissions Section -->
+                <div id="admin-commissions" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">إعدادات العمولات</h1>
+                    
+                    <div class="bg-white rounded-2xl shadow-lg p-6 max-w-2xl">
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-bold mb-2">نسبة العمولة (%)</label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="commissionSlider" min="5" max="30" value="10" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" oninput="updateCommission(this.value)">
+                                <span id="commissionValue" class="text-2xl font-bold text-purple-600 w-20">١٠%</span>
+                            </div>
+                            <p class="text-gray-500 text-sm mt-2">نسبة العمولة التي تخصم من كل مشروع</p>
+                        </div>
+
+                        <div class="border-t pt-6">
+                            <h4 class="font-bold mb-4">حساب توضيحي:</h4>
+                            <div class="bg-gray-50 rounded-xl p-4 space-y-2">
+                                <div class="flex justify-between">
+                                    <span>مبلغ المشروع:</span>
+                                    <span class="font-bold">٥٠,٠٠٠ ر.س</span>
+                                </div>
+                                <div class="flex justify-between text-purple-600">
+                                    <span>عمولة المنصة (<span id="demoCommission">١٠</span>%):</span>
+                                    <span class="font-bold" id="demoFee">٥,٠٠٠ ر.س</span>
+                                </div>
+                                <div class="border-t pt-2 flex justify-between text-green-600 font-bold">
+                                    <span>صافي تحويل للشركة:</span>
+                                    <span id="demoNet">٤٥,٠٠٠ ر.س</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="saveCommission()" class="mt-6 bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 w-full">
+                            حفظ الإعدادات
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Client Dashboard -->
+        <div id="clientDashboard" class="hidden">
+            <nav class="gradient-bg text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-handshake text-2xl"></i>
+                        <span class="text-xl font-bold">وسيط</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="showClientSection('newProject')" class="bg-white text-purple-600 px-4 py-2 rounded-lg font-bold hover:bg-gray-100">
+                            <i class="fas fa-plus"></i> مشروع جديد
+                        </button>
+                        <div class="relative">
+                            <button onclick="showClientSection('projects')" class="text-white/80 hover:text-white">
+                                <i class="fas fa-bell"></i>
+                                <span id="clientNotifications" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                            </button>
+                        </div>
+                        <button onclick="logout()" class="text-white/80 hover:text-white">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container mx-auto p-6">
+                <div id="client-newProject" class="fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">مشروع تسويقي جديد</h1>
+                    
+                    <div class="bg-white rounded-2xl shadow-lg p-8 max-w-3xl">
+                        <form id="projectForm" onsubmit="submitProject(event)" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-700 font-bold mb-2">عنوان المشروع *</label>
+                                <input type="text" id="projectTitle" required class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600" placeholder="مثال: حملة تسويقية لإطلاق منتج جديد">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-bold mb-2">تفاصيل الفكرة التسويقية *</label>
+                                <textarea id="projectDetails" rows="4" required class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600" placeholder="اشرح فكرتك بالتفصيل: المنتج/الخدمة، الجمهور المستهدف، الأهداف..."></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-bold mb-2">الميزانية (ر.س) *</label>
+                                    <input type="number" id="projectBudget" required min="1000" class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600" placeholder="٥٠,٠٠٠" oninput="calculateFees()">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-bold mb-2">المدة المتوقعة *</label>
+                                    <select id="projectDuration" required class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                                        <option value="">اختر المدة</option>
+                                        <option value="أسبوع">أسبوع</option>
+                                        <option value="أسبوعين">أسبوعين</option>
+                                        <option value="شهر">شهر</option>
+                                        <option value="شهرين">شهرين</option>
+                                        <option value="٣ أشهر">٣ أشهر</option>
+                                        <option value="٦ أشهر">٦ أشهر</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-bold mb-2">الفئة *</label>
+                                    <select id="projectCategory" required class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                                        <option value="">اختر الفئة</option>
+                                        <option value="تسويق رقمي">تسويق رقمي</option>
+                                        <option value="تصميم">تصميم</option>
+                                        <option value="إعلانات">إعلانات</option>
+                                        <option value="سوشيال ميديا">سوشيال ميديا</option>
+                                        <option value="محتوى">محتوى</option>
+                                        <option value="أخرى">أخرى</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-bold mb-2">رقم التواصل *</label>
+                                    <input type="tel" id="clientPhone" required class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-600" placeholder="05xxxxxxxx">
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                                <h4 class="font-bold text-purple-800 mb-2"><i class="fas fa-calculator"></i> تفاصيل الدفع:</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>مبلغ المشروع:</span>
+                                        <span id="displayBudget" class="font-bold">٠ ر.س</span>
+                                    </div>
+                                    <div class="flex justify-between text-purple-600">
+                                        <span>رسوم الوساطة (<span id="displayCommission">١٠</span>%):</span>
+                                        <span id="displayFee" class="font-bold">٠ ر.س</span>
+                                    </div>
+                                    <div class="border-t border-purple-200 pt-2 flex justify-between font-bold text-lg">
+                                        <span>المبلغ المستحق دفعه:</span>
+                                        <span id="displayTotal">٠ ر.س</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                                <p class="text-sm text-blue-800">
+                                    <i class="fas fa-info-circle"></i>
+                                    المبلغ سيحول لحساب المنصة وسيظل محتفظاً به حتى يتم إنجاز المشروع. بعدها نحوله للشركة ناقصاً عمولتنا.
+                                </p>
+                            </div>
+
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition flex items-center justify-center gap-2">
+                                <i class="fas fa-lock"></i>
+                                إنشاء المشروع والدفع الآمن
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="client-projects" class="hidden fade-in mt-8">
+                    <h2 class="text-2xl font-bold mb-4">مشاريعي</h2>
+                    <div id="clientProjectsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Empty State -->
+                        <div class="col-span-2 empty-state rounded-2xl p-12 text-center">
+                            <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع</h3>
+                            <p class="text-gray-500 mb-4">ابدأ بإضافة مشروعك الأول</p>
+                            <button onclick="showClientSection('newProject')" class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700">
+                                <i class="fas fa-plus"></i> مشروع جديد
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Dashboard -->
+        <div id="companyDashboard" class="hidden">
+            <nav class="gradient-bg text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-handshake text-2xl"></i>
+                        <span class="text-xl font-bold">وسيط - شركة الإبداع</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="showCompanySection('available')" class="text-white/80 hover:text-white">المتاحة</button>
+                        <button onclick="showCompanySection('myProjects')" class="text-white/80 hover:text-white">مشاريعي</button>
+                        <button onclick="logout()" class="text-white/80 hover:text-white">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container mx-auto p-6">
+                <div id="company-available" class="fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">المشاريع المتاحة</h1>
+                    
+                    <div id="availableProjects" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Empty State -->
+                        <div class="col-span-3 empty-state rounded-2xl p-12 text-center">
+                            <i class="fas fa-search text-6xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع متاحة</h3>
+                            <p class="text-gray-500">سيتم إشعارك عند إضافة مشاريع جديدة</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="company-myProjects" class="hidden fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">مشاريعي الحالية</h1>
+                    
+                    <div id="companyProjectsList" class="space-y-4">
+                        <!-- Empty State -->
+                        <div class="empty-state rounded-2xl p-12 text-center">
+                            <i class="fas fa-briefcase text-6xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-600 mb-2">لم تقبض أي مشروع</h3>
+                            <p class="text-gray-500 mb-4">ابحث عن مشاريع متاحة وقدم عرضك</p>
+                            <button onclick="showCompanySection('available')" class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700">
+                                <i class="fas fa-search"></i> البحث عن مشاريع
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold mb-4">دفع المشروع</h3>
+            <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                <div class="flex justify-between mb-2">
+                    <span>المشروع:</span>
+                    <span id="payProjectTitle" class="font-bold"></span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>المبلغ:</span>
+                    <span id="payAmount" class="font-bold"></span>
+                </div>
+                <div class="flex justify-between text-purple-600 mb-2">
+                    <span>العمولة:</span>
+                    <span id="payFee" class="font-bold"></span>
+                </div>
+                <div class="border-t pt-2 flex justify-between text-lg font-bold">
+                    <span>الإجمالي:</span>
+                    <span id="payTotal" class="text-purple-600"></span>
+                </div>
+            </div>
+            
+            <div class="space-y-3 mb-6">
+                <label class="block text-gray-700 font-bold mb-2">اختر طريقة الدفع:</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" class="border-2 border-purple-600 bg-purple-50 rounded-lg p-3 text-center">
+                        <i class="fas fa-credit-card text-2xl text-purple-600 mb-1"></i>
+                        <p class="text-xs">بطاقة</p>
+                    </button>
+                    <button type="button" class="border-2 border-gray-300 rounded-lg p-3 text-center hover:border-purple-600">
+                        <i class="fas fa-university text-2xl text-gray-600 mb-1"></i>
+                        <p class="text-xs">تحويل</p>
+                    </button>
+                    <button type="button" class="border-2 border-gray-300 rounded-lg p-3 text-center hover:border-purple-600">
+                        <i class="fas fa-wallet text-2xl text-gray-600 mb-1"></i>
+                        <p class="text-xs">محفظة</p>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="confirmPayment()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700">
+                    <i class="fas fa-lock"></i> دفع الآن
+                </button>
+                <button onclick="closePaymentModal()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-300">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Release Payment Modal -->
+    <div id="releaseModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold mb-4">تحرير المبلغ للشركة</h3>
+            <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                <div class="flex justify-between mb-2">
+                    <span>مبلغ المشروع:</span>
+                    <span id="relAmount" class="font-bold"></span>
+                </div>
+                <div class="flex justify-between text-purple-600 mb-2">
+                    <span>عمولة المنصة (<span id="relCommission"></span>%):</span>
+                    <span id="relFee" class="font-bold"></span>
+                </div>
+                <div class="border-t pt-2 flex justify-between text-green-600 font-bold text-lg">
+                    <span>صافي تحويل للشركة:</span>
+                    <span id="relNet"></span>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="confirmRelease()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700">
+                    تأكيد التحويل
+                </button>
+                <button onclick="closeReleaseModal()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-300">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accept Project Modal -->
+    <div id="acceptModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold mb-4">قبول المشروع</h3>
+            <div id="acceptProjectDetails" class="bg-gray-50 rounded-xl p-4 mb-6">
+                <!-- Dynamic content -->
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                بقبولك هذا المشروع، تلتزم بتنفيذه حسب الشروط المتفق عليها. المبلغ محتفظ به في الضمان.
+            </p>
+            <div class="flex gap-3">
+                <button onclick="confirmAccept()" class="flex-1 bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700">
+                    تأكيد القبول
+                </button>
+                <button onclick="closeAcceptModal()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-300">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Data Store
+        let currentUser = null;
+        let commissionRate = 10;
+        const ADMIN_CODE = 'Sunset14042008';
+        
+        // Data Storage
+        let projects = JSON.parse(localStorage.getItem('waseet_projects')) || [];
+        let users = JSON.parse(localStorage.getItem('waseet_users')) || { clients: [], companies: [] };
+        let activityLog = JSON.parse(localStorage.getItem('waseet_logs')) || [];
+        let stats = JSON.parse(localStorage.getItem('waseet_stats')) || {
+            totalEscrow: 0,
+            completedDeals: 0,
+            totalCommissions: 0
+        };
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            loadData();
+            
+            // Close modals on outside click
+            document.getElementById('secretModal').addEventListener('click', function(e) {
+                if (e.target === this) closeSecretModal();
+            });
+        });
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+            const dateString = now.toLocaleDateString('ar-SA');
+            const el = document.getElementById('liveTime');
+            if (el) el.textContent = dateString + ' ' + timeString;
+        }
+
+        function loadData() {
+            const savedCommission = localStorage.getItem('waseet_commission');
+            if (savedCommission) {
+                commissionRate = parseInt(savedCommission);
+                const slider = document.getElementById('commissionSlider');
+                const display = document.getElementById('commissionValue');
+                if (slider) slider.value = commissionRate;
+                if (display) display.textContent = commissionRate + '%';
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('waseet_projects', JSON.stringify(projects));
+            localStorage.setItem('waseet_users', JSON.stringify(users));
+            localStorage.setItem('waseet_logs', JSON.stringify(activityLog));
+            localStorage.setItem('waseet_stats', JSON.stringify(stats));
+        }
+
+        function addLog(action, details, amount = 0) {
+            const log = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                action: action,
+                details: details,
+                amount: amount,
+                user: currentUser
+            };
+            activityLog.unshift(log);
+            if (activityLog.length > 50) activityLog.pop();
+            saveData();
+            updateActivityLog();
+        }
+
+        // Admin Secret Login - FIXED!
+        function showSecretInput() {
+            document.getElementById('secretModal').classList.remove('hidden');
+            setTimeout(() => {
+                const input = document.getElementById('adminCode');
+                if (input) input.focus();
+            }, 100);
+        }
+
+        function closeSecretModal() {
+            document.getElementById('secretModal').classList.add('hidden');
+            const codeInput = document.getElementById('adminCode');
+            const errorMsg = document.getElementById('errorMsg');
+            if (codeInput) codeInput.value = '';
+            if (errorMsg) errorMsg.classList.add('hidden');
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                verifyAdminCode();
+            }
+        }
+
+        function verifyAdminCode() {
+            const input = document.getElementById('adminCode');
+            if (!input) return;
+            
+            const enteredCode = input.value;
+            
+            if (enteredCode === ADMIN_CODE) {
+                closeSecretModal();
+                // Direct call to login function
+                doLogin('admin');
+            } else {
+                const errorMsg = document.getElementById('errorMsg');
+                if (errorMsg) {
+                    errorMsg.classList.remove('hidden');
+                    errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> كلمة المرور غير صحيحة';
+                }
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        // Main Login Function - SEPARATED for clarity
+        function login(type) {
+            doLogin(type);
+        }
+
+        function doLogin(type) {
+            currentUser = type;
+            
+            // Hide login screen
+            const loginScreen = document.getElementById('loginScreen');
+            if (loginScreen) loginScreen.classList.add('hidden');
+            
+            // Show main app
+            const mainApp = document.getElementById('mainApp');
+            if (mainApp) mainApp.classList.remove('hidden');
+            
+            // Route to appropriate dashboard
+            if (type === 'admin') {
+                const adminDash = document.getElementById('adminDashboard');
+                if (adminDash) {
+                    adminDash.classList.remove('hidden');
+                    initCharts();
+                    updateAdminView();
+                    showToast('تم الدخول كمدير بنجاح');
+                }
+            } else if (type === 'client') {
+                const clientDash = document.getElementById('clientDashboard');
+                if (clientDash) {
+                    clientDash.classList.remove('hidden');
+                    showClientSection('newProject');
+                    updateClientView();
+                }
+            } else if (type === 'company') {
+                const companyDash = document.getElementById('companyDashboard');
+                if (companyDash) {
+                    companyDash.classList.remove('hidden');
+                    showCompanySection('available');
+                    updateCompanyView();
+                }
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            location.reload();
+        }
+
+        // Admin Functions
+        function showAdminSection(section) {
+            const sections = ['overview', 'projects', 'payments', 'users', 'logs', 'commissions'];
+            
+            sections.forEach(s => {
+                const el = document.getElementById(`admin-${s}`);
+                const nav = document.getElementById(`nav-${s}`);
+                if (el) el.classList.add('hidden');
+                if (nav) nav.classList.remove('active-nav');
+            });
+            
+            const selectedEl = document.getElementById(`admin-${section}`);
+            const selectedNav = document.getElementById(`nav-${section}`);
+            
+            if (selectedEl) selectedEl.classList.remove('hidden');
+            if (selectedNav) selectedNav.classList.add('active-nav');
+            
+            if (section === 'projects') renderAdminProjects();
+            if (section === 'payments') renderEscrow();
+            if (section === 'users') renderUsers();
+            if (section === 'logs') updateActivityLog();
+        }
+
+        function updateAdminView() {
+            updateStats();
+            renderAdminProjects();
+            renderEscrow();
+            updateActivityLog();
+        }
+
+        function updateStats() {
+            const active = projects.filter(p => p.status === 'active').length;
+            const pending = projects.filter(p => p.status === 'pending').length;
+            const completed = projects.filter(p => p.status === 'completed').length;
+            const escrow = projects.filter(p => p.status === 'active' || p.status === 'pending')
+                .reduce((sum, p) => sum + (p.amount || 0), 0);
+            
+            const totalEscrowEl = document.getElementById('totalEscrow');
+            const activeProjectsEl = document.getElementById('activeProjects');
+            const completedDealsEl = document.getElementById('completedDeals');
+            const totalCommissionsEl = document.getElementById('totalCommissions');
+            const successRateEl = document.getElementById('successRate');
+            
+            if (totalEscrowEl) totalEscrowEl.textContent = formatMoney(escrow);
+            if (activeProjectsEl) activeProjectsEl.textContent = active;
+            if (completedDealsEl) completedDealsEl.textContent = stats.completedDeals;
+            if (totalCommissionsEl) totalCommissionsEl.textContent = formatMoney(stats.totalCommissions);
+            
+            const total = active + pending + completed;
+            const rate = total > 0 ? Math.round((stats.completedDeals / total) * 100) : 0;
+            if (successRateEl) successRateEl.textContent = rate + '%';
+            
+            // Update badges
+            const projCount = document.getElementById('adminProjectCount');
+            const escCount = document.getElementById('escrowCount');
+            if (projCount) {
+                projCount.textContent = projects.length;
+                projCount.classList.toggle('hidden', projects.length === 0);
+            }
+            if (escCount) {
+                escCount.textContent = active;
+                escCount.classList.toggle('hidden', active === 0);
+            }
+        }
+
+        function renderAdminProjects() {
+            const container = document.getElementById('projectsList');
+            if (!container) return;
+            
+            const filterEl = document.getElementById('projectFilter');
+            const filter = filterEl ? filterEl.value : 'all';
+            
+            let filtered = projects;
+            if (filter !== 'all') filtered = projects.filter(p => p.status === filter);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state rounded-2xl p-12 text-center">
+                        <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع ${filter !== 'all' ? 'بهذا الحالة' : ''}</h3>
+                        <p class="text-gray-500">المشاريع ستظهر هنا عند إضافتها</p>
+                    </div>`;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-r-4 ${getStatusColor(p.status)}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold">${p.title}</h3>
+                            <p class="text-gray-500 text-sm">#${p.id} | ${p.category}</p>
+                        </div>
+                        <span class="${getStatusBadge(p.status)} px-3 py-1 rounded-full text-sm">${getStatusText(p.status)}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 mb-4 text-sm">
+                        <div>
+                            <p class="text-gray-500">العميل</p>
+                            <p class="font-bold">${p.clientName}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">الشركة</p>
+                            <p class="font-bold">${p.company || 'لم يتم التعيين'}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">المبلغ</p>
+                            <p class="font-bold text-purple-600">${formatMoney(p.amount)}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-calendar"></i> ${new Date(p.date).toLocaleDateString('ar-SA')}
+                        </div>
+                        ${p.status === 'active' ? `
+                            <button onclick="releasePayment('${p.id}')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                تحرير المبلغ
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                pending: 'border-yellow-400',
+                active: 'border-blue-400',
+                completed: 'border-green-400'
+            };
+            return colors[status] || 'border-gray-400';
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                pending: 'bg-yellow-100 text-yellow-800',
+                active: 'bg-blue-100 text-blue-800',
+                completed: 'bg-green-100 text-green-800'
+            };
+            return badges[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                pending: 'بانتظار الدفع',
+                active: 'قيد التنفيذ',
+                completed: 'مكتمل'
+            };
+            return texts[status] || status;
+        }
+
+        function renderEscrow() {
+            const container = document.getElementById('escrowList');
+            if (!container) return;
+            
+            const escrow = projects.filter(p => p.status === 'active');
+            
+            if (escrow.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state rounded-2xl p-12 text-center">
+                        <i class="fas fa-lock text-6xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد أموال محتجزة</h3>
+                        <p class="text-gray-500">الأموال المحتجزة ستظهر هنا عند دفع العملاء</p>
+                    </div>`;
+                return;
+            }
+            
+            container.innerHTML = escrow.map(p => `
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-2 border-blue-200">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white text-xl font-bold">
+                                ${formatShortMoney(p.amount)}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg">${p.title}</h3>
+                                <p class="text-gray-500">من: ${p.clientName} → إلى: ${p.company}</p>
+                                <p class="text-sm text-blue-600 mt-1">
+                                    <i class="fas fa-clock status-pulse"></i> محتجز منذ ${getDaysSince(p.date)} يوم
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-2xl font-bold text-gray-800">${formatMoney(p.amount)}</p>
+                            <button onclick="releasePayment('${p.id}')" class="mt-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 w-full">
+                                تحرير المبلغ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderUsers() {
+            // Clients
+            const clientsContainer = document.getElementById('clientsList');
+            const clientsCount = document.getElementById('clientsCount');
+            
+            if (clientsContainer) {
+                if (users.clients.length === 0) {
+                    clientsContainer.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-users text-4xl mb-2"></i>
+                            <p>لا يوجد عملاء مسجلين</p>
+                        </div>`;
+                } else {
+                    clientsContainer.innerHTML = users.clients.map(c => `
+                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=random" class="w-10 h-10 rounded-full">
+                            <div class="flex-1">
+                                <p class="font-bold">${c.name}</p>
+                                <p class="text-sm text-gray-500">${c.projects} مشاريع</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+            if (clientsCount) clientsCount.textContent = users.clients.length + ' عميل';
+            
+            // Companies
+            const companiesContainer = document.getElementById('companiesList');
+            const companiesCount = document.getElementById('companiesCount');
+            
+            if (companiesContainer) {
+                if (users.companies.length === 0) {
+                    companiesContainer.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-building text-4xl mb-2"></i>
+                            <p>لا توجد شركات مسجلة</p>
+                        </div>`;
+                } else {
+                    companiesContainer.innerHTML = users.companies.map(c => `
+                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=random" class="w-10 h-10 rounded-full">
+                            <div class="flex-1">
+                                <p class="font-bold">${c.name}</p>
+                                <p class="text-sm text-gray-500">تقييم: ${c.rating} ⭐ | ${c.projects} مشروع</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+            if (companiesCount) companiesCount.textContent = users.companies.length + ' شركة';
+        }
+
+        function updateActivityLog() {
+            const container = document.getElementById('activityLog') || document.getElementById('recentActivity');
+            if (!container) return;
+            
+            if (activityLog.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-history text-4xl mb-2"></i>
+                        <p>لا توجد عمليات مسجلة</p>
+                    </div>`;
+                return;
+            }
+            
+            const items = activityLog.slice(0, 10).map(log => `
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border-r-2 ${getLogColor(log.action)}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center ${getLogIconBg(log.action)}">
+                        <i class="fas ${getLogIcon(log.action)} text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-sm">${log.action}</p>
+                        <p class="text-xs text-gray-500">${log.details}</p>
+                    </div>
+                    <div class="text-left">
+                        ${log.amount > 0 ? `<span class="font-bold text-green-600">+${formatMoney(log.amount)}</span>` : ''}
+                        <p class="text-xs text-gray-400">${new Date(log.date).toLocaleTimeString('ar-SA')}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = items;
+        }
+
+        function getLogColor(action) {
+            const colors = {
+                'إنشاء مشروع': 'border-purple-500',
+                'دفع مبلغ': 'border-green-500',
+                'تحرير مبلغ': 'border-blue-500',
+                'عمولة': 'border-orange-500'
+            };
+            return colors[action] || 'border-gray-300';
+        }
+
+        function getLogIconBg(action) {
+            const bgs = {
+                'إنشاء مشروع': 'bg-purple-500',
+                'دفع مبلغ': 'bg-green-500',
+                'تحرير مبلغ': 'bg-blue-500',
+                'عمولة': 'bg-orange-500'
+            };
+            return bgs[action] || 'bg-gray-500';
+        }
+
+        function getLogIcon(action) {
+            const icons = {
+                'إنشاء مشروع': 'fa-plus',
+                'دفع مبلغ': 'fa-money-bill',
+                'تحرير مبلغ': 'fa-check',
+                'عمولة': 'fa-percentage'
+            };
+            return icons[action] || 'fa-info';
+        }
+
+        // Client Functions
+        function showClientSection(section) {
+            const newProject = document.getElementById('client-newProject');
+            const projects = document.getElementById('client-projects');
+            
+            if (newProject) newProject.classList.add('hidden');
+            if (projects) projects.classList.add('hidden');
+            
+            const selected = document.getElementById(`client-${section}`);
+            if (selected) selected.classList.remove('hidden');
+            
+            if (section === 'projects') renderClientProjects();
+        }
+
+        function updateClientView() {
+            renderClientProjects();
+        }
+
+        function calculateFees() {
+            const budgetEl = document.getElementById('projectBudget');
+            if (!budgetEl) return;
+            
+            const budget = parseInt(budgetEl.value) || 0;
+            const fee = Math.round(budget * (commissionRate / 100));
+            const total = budget + fee;
+            
+            const displayBudget = document.getElementById('displayBudget');
+            const displayFee = document.getElementById('displayFee');
+            const displayTotal = document.getElementById('displayTotal');
+            const displayCommission = document.getElementById('displayCommission');
+            
+            if (displayBudget) displayBudget.textContent = formatMoney(budget);
+            if (displayFee) displayFee.textContent = formatMoney(fee);
+            if (displayTotal) displayTotal.textContent = formatMoney(total);
+            if (displayCommission) displayCommission.textContent = commissionRate;
+        }
+
+        let currentProject = null;
+
+        function submitProject(e) {
+            e.preventDefault();
+            
+            const titleEl = document.getElementById('projectTitle');
+            const detailsEl = document.getElementById('projectDetails');
+            const budgetEl = document.getElementById('projectBudget');
+            const durationEl = document.getElementById('projectDuration');
+            const categoryEl = document.getElementById('projectCategory');
+            const phoneEl = document.getElementById('clientPhone');
+            
+            if (!titleEl || !budgetEl) return;
+            
+            const project = {
+                id: 'PRJ-' + Date.now(),
+                title: titleEl.value,
+                details: detailsEl ? detailsEl.value : '',
+                amount: parseInt(budgetEl.value),
+                duration: durationEl ? durationEl.value : '',
+                category: categoryEl ? categoryEl.value : '',
+                clientPhone: phoneEl ? phoneEl.value : '',
+                clientName: 'أحمد محمد',
+                status: 'pending',
+                date: new Date().toISOString(),
+                company: null
+            };
+            
+            currentProject = project;
+            showPaymentModal(project);
+        }
+
+        function showPaymentModal(project) {
+            const fee = Math.round(project.amount * (commissionRate / 100));
+            const total = project.amount + fee;
+            
+            const payTitle = document.getElementById('payProjectTitle');
+            const payAmount = document.getElementById('payAmount');
+            const payFee = document.getElementById('payFee');
+            const payTotal = document.getElementById('payTotal');
+            
+            if (payTitle) payTitle.textContent = project.title;
+            if (payAmount) payAmount.textContent = formatMoney(project.amount);
+            if (payFee) payFee.textContent = formatMoney(fee);
+            if (payTotal) payTotal.textContent = formatMoney(total);
+            
+            const modal = document.getElementById('paymentModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function confirmPayment() {
+            if (!currentProject) return;
+            
+            // Save project
+            projects.push(currentProject);
+            
+            // Add client to users if new
+            if (!users.clients.find(c => c.name === currentProject.clientName)) {
+                users.clients.push({
+                    name: currentProject.clientName,
+                    phone: currentProject.clientPhone,
+                    projects: 1
+                });
+            } else {
+                const client = users.clients.find(c => c.name === currentProject.clientName);
+                client.projects++;
+            }
+            
+            // Log
+            addLog('إنشاء مشروع', `مشروع: ${currentProject.title}`, 0);
+            addLog('دفع مبلغ', `دفع ${formatMoney(currentProject.amount)} للمشروع ${currentProject.id}`, currentProject.amount);
+            
+            saveData();
+            closePaymentModal();
+            
+            showToast('تم إنشاء المشروع ودفع المبلغ بنجاح! المبلغ محتفظ به في الضمان.');
+            showClientSection('projects');
+            updateStats();
+        }
+
+        function renderClientProjects() {
+            const container = document.getElementById('clientProjectsList');
+            if (!container) return;
+            
+            const myProjects = projects.filter(p => p.clientName === 'أحمد محمد');
+            
+            if (myProjects.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-2 empty-state rounded-2xl p-12 text-center">
+                        <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع</h3>
+                        <p class="text-gray-500 mb-4">ابدأ بإضافة مشروعك الأول</p>
+                        <button onclick="showClientSection('newProject')" class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700">
+                            <i class="fas fa-plus"></i> مشروع جديد
+                        </button>
+                    </div>`;
+                return;
+            }
+            
+            container.innerHTML = myProjects.map(p => `
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-t-4 ${getStatusColor(p.status)}">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="${getStatusBadge(p.status)} px-3 py-1 rounded-full text-sm">${getStatusText(p.status)}</span>
+                        <span class="text-gray-500 text-sm">#${p.id}</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">${p.title}</h3>
+                    <p class="text-gray-600 mb-4 line-clamp-2">${p.details}</p>
+                    <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
+                        <span><i class="fas fa-building"></i> ${p.company || 'في انتظار الشركة'}</span>
+                        <span><i class="fas fa-money-bill"></i> ${formatMoney(p.amount)}</span>
+                    </div>
+                    ${p.status === 'pending' ? `
+                        <div class="bg-yellow-50 rounded-lg p-3 text-center">
+                            <span class="text-yellow-600 font-bold"><i class="fas fa-clock"></i> في انتظار دفع المبلغ</span>
+                        </div>
+                    ` : p.status === 'active' ? `
+                        <div class="bg-blue-50 rounded-lg p-3 text-center">
+                            <span class="text-blue-600 font-bold"><i class="fas fa-lock"></i> المبلغ محتفظ به في الضمان</span>
+                        </div>
+                    ` : `
+                        <div class="bg-green-50 rounded-lg p-3 text-center">
+                            <span class="text-green-600 font-bold"><i class="fas fa-check"></i> تم إنجاز المشروع</span>
+                        </div>
+                    `}
+                </div>
+            `).join('');
+        }
+
+        // Company Functions
+        function showCompanySection(section) {
+            const available = document.getElementById('company-available');
+            const myProjects = document.getElementById('company-myProjects');
+            
+            if (available) available.classList.add('hidden');
+            if (myProjects) myProjects.classList.add('hidden');
+            
+            const selected = document.getElementById(`company-${section}`);
+            if (selected) selected.classList.remove('hidden');
+            
+            if (section === 'available') renderAvailableProjects();
+            if (section === 'myProjects') renderCompanyProjects();
+        }
+
+        function updateCompanyView() {
+            renderAvailableProjects();
+            renderCompanyProjects();
+        }
+
+        let selectedProjectId = null;
+
+        function renderAvailableProjects() {
+            const container = document.getElementById('availableProjects');
+            if (!container) return;
+            
+            const available = projects.filter(p => p.status === 'pending' && !p.company);
+            
+            if (available.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 empty-state rounded-2xl p-12 text-center">
+                        <i class="fas fa-search text-6xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">لا توجد مشاريع متاحة</h3>
+                        <p class="text-gray-
